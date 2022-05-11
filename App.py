@@ -36,7 +36,7 @@ def add_contact():
         print(data[0])
         flag = False
         name=""
-        id=0
+        id=0    
         for tup in data:
             if tup[1] == user and tup[0] == passw:
                 flag = True
@@ -82,6 +82,37 @@ def add_client():
         cur.close()
         flash('Contact Added successfully')
         return render_template('index-admin.html',users=data)
+
+@app.route('/retiro', methods=['POST'])
+def retiro():
+    if request.method == 'POST':
+        ide= request.form['id']
+        nroc = request.form['nrocuenta']
+        monto = request.form['monto']
+        cur.execute("SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.idusuario=%s and xc.idcuenta=%s", (id, nroc))
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        saldo=data[0][3]
+        if(monto<saldo):
+            flash('Retiro exitoso¡¡')
+        else:
+            flash('No cuenta con saldo suficiente')
+        return render_template('index-cliente',users=data)
+    pass
+
+@app.route('/saldo', methods=['POST'])
+def saldo():
+    pass
+
+@app.route('/transferencia', methods=['POST'])
+def transferencia():
+    pass
+
+@app.route('/deposito', methods=['POST'])
+def deposito():
+    pass
+
 @app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_contact(id):
     cur = mysql.connection.cursor()
