@@ -35,26 +35,53 @@ def add_contact():
         cur.close()
         print(data[0])
         flag = False
+        name=""
         id=0
         for tup in data:
             if tup[1] == user and tup[0] == passw:
                 flag = True
                 id=tup[3]
+                name=tup[2]
+        print(name)
         if(flag):
-            if tup[2]=="cliente":
+            if name=="cliente":
+                ide=int(id)
+                print(type(id),id)
                 cur = mysql.connection.cursor()
-                cur.execute("select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id=%s",(id))
+                squery="select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id ="+str(id)
+                cur.execute(squery)
                 mysql.connection.commit()
                 data = cur.fetchall()
                 cur.close()
                 return render_template('index-client.html',accounts=data)
-            elif tup[2]=="administrador":
-                return render_template('index-admin.html')
+            elif name=="administrador":
+                cur = mysql.connection.cursor()
+                cur.execute("select * from usuario")
+                mysql.connection.commit()
+                data = cur.fetchall()
+                cur.close()
+                return render_template('index-admin.html',users=data)
         else:
             #flash('Contact Added successfully')
             return render_template('signin.html')
 
 
+@app.route('/add_client', methods=['POST'])
+def add_client():
+    if request.method == 'POST':
+        ci = request.form['ci']
+        nombre = request.form['nombre']
+        app = request.form['ape_pat']
+        apm = request.form['ape_mat']
+        user = request.form['username']
+        contr = request.form['contrasenia']
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT into usuario(ci,nombre,apellidoP,apellidoM,username,contrasenia,rol)VALUES(%s,%s,%s,%s,%s,%s,'cliente')", (ci, nombre, app,apm,user,contr))
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        flash('Contact Added successfully')
+        return render_template('index-admin.html',users=data)
 @app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_contact(id):
     cur = mysql.connection.cursor()
