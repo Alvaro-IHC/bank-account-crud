@@ -18,7 +18,7 @@ app.secret_key = "mysecretkey"
 # routes
 
 
-def consultaCliente():
+def consultaCliente(id):
     cur = mysql.connection.cursor()
     squery = "select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
         str(id)
@@ -102,29 +102,44 @@ def add_client():
 @app.route('/retiro', methods=['POST'])
 def retiro():
     if request.method == 'POST':
-        nroc = request.form['nrocuenta']
+        nroc = request.form['account']
+        monto = request.form['amount']
         #nroc=request.args.get('nrocuenta','no contiene')
         #monto=request.args.get('monto','no contiene')
+
+        query = "SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo,xc.idcuenta,xu.id FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.nrocuenta=" + \
+            str(nroc)
         cur = mysql.connection.cursor()
-        cur.execute("SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo,xc.idcuenta FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.nrocuenta=%s", (nroc))
+        cur.execute(query)
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
         saldo = data[0][3]
+        id = data[0][5]
         idcuenta = data[0][4]
+        print(id)
+        monto = int(monto)
+        saldo = int(saldo)
         if(monto < saldo):
             flash('Retiro exitoso¡¡')
             actual = saldo - monto
             cur = mysql.connection.cursor()
-            cur.execute(
-                "UPDATE cuenta set saldo=50000 WHERE idcuenta=%s", (idcuenta))
+            #"UPDATE cuenta set saldo="+str(monto)+"WHERE idcuenta="+str(idcuenta)
+            cur.execute("UPDATE cuenta set saldo="+str(actual) +
+                        " WHERE idcuenta="+str(idcuenta))
             mysql.connection.commit()
             data = cur.fetchall()
             cur.close()
         else:
             flash('No cuenta con saldo suficiente¡¡')
-        data = consultaCliente()
-        return render_template('index-cliente.html', users=data)
+        cur = mysql.connection.cursor()
+        squery = "select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
+            str(id)
+        cur.execute(squery)
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        return render_template('index-client.html', accounts=data)
 
 
 @app.route('/saldo', methods=['POST'])

@@ -3,6 +3,7 @@
 
 <div class="row">
     <div class="col-md-8">
+
         <div class="card card-body">
             <form action="{{url_for('retiro')}}" method="POST">
                 <fieldset>
@@ -20,8 +21,9 @@
                     <button class="btn btn-primary">Ejecutar</button>
                 </div>
             </form>
-            <hr>
-            <form action="{{url_for('add_client')}}" method="POST">
+        </div>
+        <div class="card card-body">
+            <form action="{{url_for('deposito')}}" method="POST">
                 <fieldset>
                     <legend>Depósito</legend>
                     <div class="field">
@@ -37,8 +39,9 @@
                     <button class="btn btn-primary">Ejecutar</button>
                 </div>
             </form>
-            <hr>
-            <form action="{{url_for('add_client')}}" method="POST">
+        </div>
+        <div class="card card-body">
+            <form action="{{url_for('transferencia')}}" method="POST">
                 <fieldset>
                     <legend>Transferencia</legend>
                     <div class="field">
@@ -60,8 +63,9 @@
                     <button class="btn btn-primary">Ejecutar</button>
                 </div>
             </form>
-            <hr>
-            <form action="{{url_for('add_client')}}" method="POST">
+        </div>
+        <div class="card card-body">
+            <form action="{{url_for('saldo')}}" method="POST">
                 <fieldset>
                     <legend>Consulta de saldo</legend>
                     <div class="field">
@@ -73,12 +77,9 @@
                     <button class="btn btn-primary">Ejecutar</button>
                 </div>
             </form>
-
-
-
-
-
         </div>
+
+
     </div>
     <div class="col-md-4">
         <table class="table table-striped table-hover table-bordered table-sm bg-white">
@@ -90,7 +91,6 @@
                 </tr>
             </thead>
             <tbody>
-
                 {% for account in accounts %}
                 <tr>
                     <td>{{account.0}}</td>
@@ -101,7 +101,6 @@
             </tbody>
         </table>
     </div>
-</div>
 </div>
 
 {% endblock %}

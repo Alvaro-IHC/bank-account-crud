@@ -23,3 +23,7 @@ fieldset {
 .field label {
   min-width: 30%;
 }
+
+.card {
+  margin-bottom: 20px;
+}
