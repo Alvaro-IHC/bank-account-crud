@@ -2,8 +2,85 @@
 {% block body %}
 
 <div class="row">
+    <div class="col-md-8">
+        <div class="card card-body">
+            <form action="{{url_for('retiro')}}" method="POST">
+                <fieldset>
+                    <legend>Retiro</legend>
+                    <div class="field">
+                        <label for="amount">¿Cuanto dinero retirará?</label>
+                        <input id="amount" type="number" class="form-control" name="amount" value="100">
+                    </div>
+                    <div class="field">
+                        <label for="account">Introduzca la cuenta</label>
+                        <input id="account" type="text" class="form-control" name="account" placeholder="100000xxxx">
+                    </div>
+                </fieldset>
+                <div class="text-right">
+                    <button class="btn btn-primary">Ejecutar</button>
+                </div>
+            </form>
+            <hr>
+            <form action="{{url_for('add_client')}}" method="POST">
+                <fieldset>
+                    <legend>Depósito</legend>
+                    <div class="field">
+                        <label for="amount">¿Cuanto dinero depositará?</label>
+                        <input id="amount" type="number" class="form-control" name="amount" value="100">
+                    </div>
+                    <div class="field">
+                        <label for="account">Introduzca la cuenta</label>
+                        <input id="account" type="text" class="form-control" name="account" placeholder="100000xxxx">
+                    </div>
+                </fieldset>
+                <div class="text-right">
+                    <button class="btn btn-primary">Ejecutar</button>
+                </div>
+            </form>
+            <hr>
+            <form action="{{url_for('add_client')}}" method="POST">
+                <fieldset>
+                    <legend>Transferencia</legend>
+                    <div class="field">
+                        <label for="amount">¿Cuanto dinero transferirá?</label>
+                        <input id="amount" type="number" class="form-control" name="amount" value="100">
+                    </div>
+                    <div class="field">
+                        <label for="accountOrigin">Introduzca la cuenta origen</label>
+                        <input id="accountOrigin" type="text" class="form-control" name="accountOrigin"
+                            placeholder="100000xxxx">
+                    </div>
+                    <div class="field">
+                        <label for="accountDest">Introduzca la cuenta origen</label>
+                        <input id="accountDest" type="text" class="form-control" name="accountDest"
+                            placeholder="100000xxxx">
+                    </div>
+                </fieldset>
+                <div class="text-right">
+                    <button class="btn btn-primary">Ejecutar</button>
+                </div>
+            </form>
+            <hr>
+            <form action="{{url_for('add_client')}}" method="POST">
+                <fieldset>
+                    <legend>Consulta de saldo</legend>
+                    <div class="field">
+                        <label for="account">Introduzca la cuenta</label>
+                        <input id="account" type="text" class="form-control" name="account" placeholder="100000xxxx">
+                    </div>
+                </fieldset>
+                <div class="text-right">
+                    <button class="btn btn-primary">Ejecutar</button>
+                </div>
+            </form>
 
-    <div class="col-md-7">
+
+
+
+
+        </div>
+    </div>
+    <div class="col-md-4">
         <table class="table table-striped table-hover table-bordered table-sm bg-white">
             <thead>
                 <tr>

@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'banco'
+app.config['MYSQL_DB'] = 'bankaccounts'
 mysql = MySQL(app)
 
 # settings
@@ -44,32 +44,32 @@ def add_contact():
         cur.close()
         print(data[0])
         flag = False
-        name=""
-        id=0    
+        name = ""
+        id = 0
         for tup in data:
             if tup[1] == user and tup[0] == passw:
                 flag = True
-                id=tup[3]
-                name=tup[2]
+                id = tup[3]
+                name = tup[2]
         print(name)
         if(flag):
-            if name=="cliente":
-                ide=int(id)
-                print(type(id),id)
+            if name == "cliente":
+                ide = int(id)
+                print(type(id), id)
                 cur = mysql.connection.cursor()
                 squery="select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id ="+str(id)
                 cur.execute(squery)
                 mysql.connection.commit()
                 data = cur.fetchall()
                 cur.close()
-                return render_template('index-client.html',accounts=data)
-            elif name=="administrador":
+                return render_template('index-client.html', accounts=data)
+            elif name == "administrador":
                 cur = mysql.connection.cursor()
                 cur.execute("select * from usuario")
                 mysql.connection.commit()
                 data = cur.fetchall()
                 cur.close()
-                return render_template('index-admin.html',users=data)
+                return render_template('index-admin.html', users=data)
         else:
             #flash('Contact Added successfully')
             return render_template('signin.html')
@@ -85,12 +85,14 @@ def add_client():
         user = request.form['username']
         contr = request.form['contrasenia']
         cur = mysql.connection.cursor()
-        cur.execute("INSERT into usuario(ci,nombre,apellidoP,apellidoM,username,contrasenia,rol)VALUES(%s,%s,%s,%s,%s,%s,'cliente')", (ci, nombre, app,apm,user,contr))
+        cur.execute("INSERT into usuario(ci,nombre,apellidoP,apellidoM,username,contrasenia,rol)VALUES(%s,%s,%s,%s,%s,%s,'cliente')",
+                    (ci, nombre, app, apm, user, contr))
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
         flash('Contact Added successfully')
-        return render_template('index-admin.html',users=data)
+        return render_template('index-admin.html', users=data)
+
 
 @app.route('/retiro', methods=['POST'])
 def retiro():
@@ -118,6 +120,7 @@ def retiro():
         data=consultaCliente()
         return render_template('index-cliente.html',users=data)
 
+
 @app.route('/saldo', methods=['POST'])
 def saldo():
     if request.method == 'POST':
@@ -133,6 +136,7 @@ def saldo():
         flash('Saldo actual: '+str(saldo))
         data=consultaCliente()
         return render_template('index-cliente.html',users=data)
+
 
 
 @app.route('/transferencia', methods=['POST'])
@@ -166,9 +170,11 @@ def transferencia():
         return render_template('index-cliente.html',users=data)
     pass
 
+
 @app.route('/deposito', methods=['POST'])
 def deposito():
     pass
+
 
 @app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_contact(id):
