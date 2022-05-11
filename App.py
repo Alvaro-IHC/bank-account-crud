@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
+from flask import request
 
 # initializations
 app = Flask(__name__)
@@ -17,8 +18,20 @@ app.secret_key = "mysecretkey"
 # routes
 
 
+def consultaCliente():
+    cur = mysql.connection.cursor()
+    squery = "select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
+        str(id)
+    cur.execute(squery)
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
+    return data
+
+
 @app.route('/')
 def Index():
+
     return render_template('signin.html')
 
 
@@ -48,7 +61,7 @@ def add_contact():
                 ide = int(id)
                 print(type(id), id)
                 cur = mysql.connection.cursor()
-                squery = "select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
+                squery = "select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
                     str(id)
                 cur.execute(squery)
                 mysql.connection.commit()
@@ -89,29 +102,76 @@ def add_client():
 @app.route('/retiro', methods=['POST'])
 def retiro():
     if request.method == 'POST':
-        ide = request.form['id']
         nroc = request.form['nrocuenta']
-        monto = request.form['monto']
-        cur.execute("SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.idusuario=%s and xc.idcuenta=%s", (id, nroc))
+        #nroc=request.args.get('nrocuenta','no contiene')
+        #monto=request.args.get('monto','no contiene')
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo,xc.idcuenta FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.nrocuenta=%s", (nroc))
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
         saldo = data[0][3]
+        idcuenta = data[0][4]
         if(monto < saldo):
             flash('Retiro exitoso¡¡')
+            actual = saldo - monto
+            cur = mysql.connection.cursor()
+            cur.execute(
+                "UPDATE cuenta set saldo=50000 WHERE idcuenta=%s", (idcuenta))
+            mysql.connection.commit()
+            data = cur.fetchall()
+            cur.close()
         else:
-            flash('No cuenta con saldo suficiente')
-        return render_template('index-cliente', users=data)
-    pass
+            flash('No cuenta con saldo suficiente¡¡')
+        data = consultaCliente()
+        return render_template('index-cliente.html', users=data)
 
 
 @app.route('/saldo', methods=['POST'])
 def saldo():
-    pass
+    if request.method == 'POST':
+        #ide=request.args.get('id','no contiene')
+        #nroc=request.args.get('brocuenta','no contiene')
+        nroc = request.form['nrocuenta']
+        cur = mysql.connection.cursor()
+        cur.execute(
+            "SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo FROM usuario xu, cuenta xc WHERE  xu.id=xc.idusuario and xc.nrocuenta=%s", (nroc))
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        saldo = data[0][3]
+        flash('Saldo actual: '+str(saldo))
+        data = consultaCliente()
+        return render_template('index-cliente.html', users=data)
 
 
 @app.route('/transferencia', methods=['POST'])
 def transferencia():
+    if request.method == 'POST':
+        org = request.form['origen']
+        dest = request.form['destino']
+        monto = request.form['monto']
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT saldo,nrocuenta from cuenta")
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        flag = False
+        for tup in data:
+            if tup[1] == dest:
+                flag = True
+        if flag:
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT saldo,nrocuenta from cuenta")
+            mysql.connection.commit()
+            data = cur.fetchall()
+            flash('Saldo actual: '+str(saldo))
+            cur.close()
+        else:
+            flash('Saldo actual: '+str(saldo))
+
+        data = consultaCliente()
+        return render_template('index-cliente.html', users=data)
     pass
 
 
