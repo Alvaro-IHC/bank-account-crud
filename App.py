@@ -40,8 +40,8 @@ def add_contact():
         if(flag):
             return render_template('index.html')
         else:
-            flash('Contact Added successfully')
-            return redirect(url_for('signin))
+            flash('Data invalid')
+            return render_template('signin.html')
 
 
 @app.route('/edit/<id>', methods=['POST', 'GET'])
