@@ -5,7 +5,7 @@ from flask_mysqldb import MySQL
 app = Flask(__name__)
 
 # Mysql Connection
-app.config['MYSQL_HOST'] = 'localhost' 
+app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'banco'
@@ -15,34 +15,36 @@ mysql = MySQL(app)
 app.secret_key = "mysecretkey"
 
 # routes
+
+
 @app.route('/')
 def Index():
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM usuario')
-    data = cur.fetchall()
-    cur.close()
-    return render_template('index.html', users = data)
+    return render_template('index.html')
 
-@app.route('/add_contact', methods=['POST'])
+@app.route('/signin', methods=['POST'])
 def add_contact():
     if request.method == 'POST':
-        fullname = request.form['fullname']
-        phone = request.form['phone']
-        email = request.form['email']
+        user = request.form['username']
+        passw = request.form['password']
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO usuario (fullname, phone, email) VALUES (%s,%s,%s)", (fullname, phone, email))
+        cur.execute("select password,username from usuario")
         mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        print(data[0])
         flash('Contact Added successfully')
         return redirect(url_for('Index'))
 
-@app.route('/edit/<id>', methods = ['POST', 'GET'])
+
+@app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_contact(id):
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM usuario WHERE id = %s', (id))
     data = cur.fetchall()
     cur.close()
     print(data[0])
-    return render_template('edit-contact.html', contact = data[0])
+    return render_template('edit-contact.html', contact=data[0])
+
 
 @app.route('/update/<id>', methods=['POST'])
 def update_contact(id):
@@ -62,13 +64,15 @@ def update_contact(id):
         mysql.connection.commit()
         return redirect(url_for('Index'))
 
-@app.route('/delete/<string:id>', methods = ['POST','GET'])
+
+@app.route('/delete/<string:id>', methods=['POST', 'GET'])
 def delete_contact(id):
     cur = mysql.connection.cursor()
     cur.execute('DELETE FROM usuario WHERE id = {0}'.format(id))
     mysql.connection.commit()
     flash('Contact Removed Successfully')
     return redirect(url_for('Index'))
+
 
 # starting the app
 if __name__ == "__main__":
