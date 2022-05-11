@@ -19,32 +19,20 @@ app.secret_key = "mysecretkey"
 
 @app.route('/')
 def Index():
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM usuario')
-    data = cur.fetchall()
-    cur.close()
     return render_template('signin.html')
 
 
-@app.route('/home', methods=['POST'])
-def Index2():
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM usuario')
-    data = cur.fetchall()
-    cur.close()
-    return render_template('index.html', users=data)
-
-
-@app.route('/add_contact', methods=['POST'])
+@app.route('/signin', methods=['POST'])
 def add_contact():
     if request.method == 'POST':
-        fullname = request.form['fullname']
-        phone = request.form['phone']
-        email = request.form['email']
+        user = request.form['username']
+        passw = request.form['password']
         cur = mysql.connection.cursor()
-        cur.execute(
-            "INSERT INTO contacts (fullname, phone, email) VALUES (%s,%s,%s)", (fullname, phone, email))
+        cur.execute("select password,username from usuario")
         mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        print(data[0])
         flash('Contact Added successfully')
         return redirect(url_for('Index'))
 
