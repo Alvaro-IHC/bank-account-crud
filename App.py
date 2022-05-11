@@ -29,20 +29,27 @@ def add_contact():
         user = request.form['username']
         passw = request.form['password']
         cur = mysql.connection.cursor()
-        cur.execute("select contrasenia,username,rol from usuario")
+        cur.execute("select contrasenia,username,rol,id from usuario")
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
         print(data[0])
         flag = False
+        id=0
         for tup in data:
             if tup[1] == user and tup[0] == passw:
                 flag = True
+                id=tup[3]
         if(flag):
             if tup[2]=="cliente":
-                return render_template('index_client.html')
+                cur = mysql.connection.cursor()
+                cur.execute("select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id=%s",(id))
+                mysql.connection.commit()
+                data = cur.fetchall()
+                cur.close()
+                return render_template('index-client.html',accounts=data)
             elif tup[2]=="administrador":
-                return render_template('index_admin.html')
+                return render_template('index-admin.html')
         else:
             #flash('Contact Added successfully')
             return render_template('signin.html')

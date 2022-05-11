@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="row">
+
+    <div class="col-md-7">
+        <table class="table table-striped table-hover table-bordered table-sm bg-white">
+            <thead>
+                <tr>
+                    <td>Cuenta</td>
+                    <td>Monto</td>
+                    <td>Fecha</td>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for account in accounts %}
+                <tr>
+                    <td>{{account.0}}</td>
+                    <td>{{account.1}}</td>
+                    <td>{{account.2}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+{% endblock %}
