@@ -29,7 +29,7 @@ def add_contact():
         user = request.form['username']
         passw = request.form['password']
         cur = mysql.connection.cursor()
-        cur.execute("select password,username from usuario")
+        cur.execute("select contrasenia,username,rol from usuario")
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
@@ -39,10 +39,13 @@ def add_contact():
             if tup[1] == user and tup[0] == passw:
                 flag = True
         if(flag):
-            return render_template('index.html')
+            if tup[2]=="cliente":
+                return render_template('index_client.html')
+            elif tup[2]=="administrador":
+                return render_template('index_admin.html')
         else:
-            flash('Contact Added successfully')
-            return redirect(url_for('signin'))
+            #flash('Contact Added successfully')
+            return render_template('signin.html')
 
 
 @app.route('/edit/<id>', methods=['POST', 'GET'])
