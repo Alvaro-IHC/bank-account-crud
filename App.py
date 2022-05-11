@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'bankaccounts'
+app.config['MYSQL_DB'] = 'banco'
 mysql = MySQL(app)
 
 # settings
@@ -24,6 +24,7 @@ def Index():
 
 @app.route('/signin', methods=['POST'])
 def add_contact():
+    print('hola')
     if request.method == 'POST':
         user = request.form['username']
         passw = request.form['password']
@@ -41,7 +42,7 @@ def add_contact():
             return render_template('index.html')
         else:
             flash('Contact Added successfully')
-            return redirect(url_for('signin))
+            return redirect(url_for('signin'))
 
 
 @app.route('/edit/<id>', methods=['POST', 'GET'])
