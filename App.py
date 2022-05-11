@@ -19,7 +19,7 @@ app.secret_key = "mysecretkey"
 
 @app.route('/')
 def Index():
-    return render_template('index.html')
+    return render_template('signin.html')
 
 @app.route('/signin', methods=['POST'])
 def add_contact():
@@ -32,8 +32,15 @@ def add_contact():
         data = cur.fetchall()
         cur.close()
         print(data[0])
-        flash('Contact Added successfully')
-        return redirect(url_for('Index'))
+        flag=False
+        for tup in data:
+            if tup[1]==user and tup[0]==passw:
+                flag=True
+        if(flag):
+           return render_template('index.html') 
+        else:
+            flash('Contact Added successfully')
+            return redirect(url_for('signin))
 
 
 @app.route('/edit/<id>', methods=['POST', 'GET'])
