@@ -9,34 +9,21 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'bankaccounts'
+app.config['MYSQL_DB'] = 'banco'
 mysql = MySQL(app)
 
 # settings
 app.secret_key = "mysecretkey"
 
-# routes
-
-
-def consultaCliente(id):
-    cur = mysql.connection.cursor()
-    squery = "select nrocuenta,saldo,fecha from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
-        str(id)
-    cur.execute(squery)
-    mysql.connection.commit()
-    data = cur.fetchall()
-    cur.close()
-    return data
-
 
 @app.route('/')
 def Index():
-
+    
     return render_template('signin.html')
-
+    
 
 @app.route('/signin', methods=['POST'])
-def add_contact():
+def signin():
     print('hola')
     if request.method == 'POST':
         user = request.form['username']
@@ -61,8 +48,7 @@ def add_contact():
                 ide = int(id)
                 print(type(id), id)
                 cur = mysql.connection.cursor()
-                squery = "select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
-                    str(id)
+                squery="select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id ="+str(id)
                 cur.execute(squery)
                 mysql.connection.commit()
                 data = cur.fetchall()
@@ -76,8 +62,9 @@ def add_contact():
                 cur.close()
                 return render_template('index-admin.html', users=data)
         else:
-            #flash('Contact Added successfully')
-            return render_template('signin.html')
+            flash('incorrecto')
+        return redirect(url_for('Index'))
+        #return render_template('signin.html')
 
 
 @app.route('/add_client', methods=['POST'])
@@ -90,12 +77,16 @@ def add_client():
         user = request.form['username']
         contr = request.form['contrasenia']
         cur = mysql.connection.cursor()
-        cur.execute("INSERT into usuario(ci,nombre,apellidoP,apellidoM,username,contrasenia,rol)VALUES(%s,%s,%s,%s,%s,%s,'cliente')",
-                    (ci, nombre, app, apm, user, contr))
+        cur.execute("INSERT into usuario(ci,nombre,apellidoP,apellidoM,username,contrasenia,rol)VALUES(%s,%s,%s,%s,%s,%s,'cliente')",(ci, nombre, app, apm, user, contr))
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
         flash('Contact Added successfully')
+        cur = mysql.connection.cursor()
+        cur.execute("select * from usuario")
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
         return render_template('index-admin.html', users=data)
 
 
@@ -103,43 +94,42 @@ def add_client():
 def retiro():
     if request.method == 'POST':
         nroc = request.form['account']
-        monto = request.form['amount']
+        monto= request.form['amount']
         #nroc=request.args.get('nrocuenta','no contiene')
         #monto=request.args.get('monto','no contiene')
 
-        query = "SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo,xc.idcuenta,xu.id FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.nrocuenta=" + \
-            str(nroc)
+        query="SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo,xc.idcuenta,xu.id FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.nrocuenta="+str(nroc)
         cur = mysql.connection.cursor()
         cur.execute(query)
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
-        saldo = data[0][3]
-        id = data[0][5]
-        idcuenta = data[0][4]
+        saldo=data[0][3]
+        id=data[0][5]
+        idcuenta=data[0][4]
         print(id)
-        monto = int(monto)
-        saldo = int(saldo)
-        if(monto < saldo):
+        monto=int(monto)
+        saldo=int(saldo)
+        if(monto <saldo):
             flash('Retiro exitoso¡¡')
-            actual = saldo - monto
+            actual=saldo -monto
             cur = mysql.connection.cursor()
             #"UPDATE cuenta set saldo="+str(monto)+"WHERE idcuenta="+str(idcuenta)
-            cur.execute("UPDATE cuenta set saldo="+str(actual) +
-                        " WHERE idcuenta="+str(idcuenta))
+            cur.execute("UPDATE cuenta set saldo="+str(actual)+ " WHERE idcuenta="+str(idcuenta))
             mysql.connection.commit()
             data = cur.fetchall()
             cur.close()
         else:
             flash('No cuenta con saldo suficiente¡¡')
         cur = mysql.connection.cursor()
-        squery = "select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id =" + \
-            str(id)
+        squery="select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id ="+str(id)
         cur.execute(squery)
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
+        #return redirect(url_for('signin'))
         return render_template('index-client.html', accounts=data)
+
 
 
 @app.route('/saldo', methods=['POST'])
@@ -149,49 +139,97 @@ def saldo():
         #nroc=request.args.get('brocuenta','no contiene')
         nroc = request.form['nrocuenta']
         cur = mysql.connection.cursor()
-        cur.execute(
-            "SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo FROM usuario xu, cuenta xc WHERE  xu.id=xc.idusuario and xc.nrocuenta=%s", (nroc))
+        cur.execute("SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo FROM usuario xu, cuenta xc WHERE  xu.id=xc.idusuario and xc.nrocuenta=%s", (nroc))
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
-        saldo = data[0][3]
+        saldo=data[0][3]
         flash('Saldo actual: '+str(saldo))
-        data = consultaCliente()
-        return render_template('index-cliente.html', users=data)
+        data=consultaCliente()
+        return render_template('index-cliente.html',users=data)
+
 
 
 @app.route('/transferencia', methods=['POST'])
 def transferencia():
     if request.method == 'POST':
-        org = request.form['origen']
-        dest = request.form['destino']
-        monto = request.form['monto']
+        org = request.form['accountOrigin']
+        dest = request.form['accountDest']
+        monto = request.form['amount']
         cur = mysql.connection.cursor()
-        cur.execute("SELECT saldo,nrocuenta from cuenta")
+        cur.execute("SELECT saldo,nrocuenta,idcuenta,idusuario from cuenta")
         mysql.connection.commit()
         data = cur.fetchall()
         cur.close()
-        flag = False
+        flag=False
+        flag1=False
+        idcuentaO,salO=0,0
+        idcuentaD,salD=0,0
+        id=data[0][3]
         for tup in data:
-            if tup[1] == dest:
-                flag = True
-        if flag:
+            if tup[1]==dest:
+                flag=True
+                salD=tup[0]
+                idcuentaD=tup[2]
+            if tup[1]==org:
+                flag1=True
+                salO=tup[0]
+                idcuentaO=tup[2]
+        if flag and flag1:
             cur = mysql.connection.cursor()
-            cur.execute("SELECT saldo,nrocuenta from cuenta")
+            cur.execute("UPDATE cuenta set saldo="+str(int(salO)-int(monto))+ " WHERE idcuenta="+str(idcuentaO))
+            cur.execute("UPDATE cuenta set saldo="+str(int(salD)+int(monto))+ " WHERE idcuenta="+str(idcuentaD))
             mysql.connection.commit()
             data = cur.fetchall()
-            flash('Saldo actual: '+str(saldo))
+            flash('TRANSFERENCIA EXITOSA')
             cur.close()
         else:
-            flash('Saldo actual: '+str(saldo))
-
-        data = consultaCliente()
-        return render_template('index-cliente.html', users=data)
+            flash('CUENTA INCORRECTA')
+        cur = mysql.connection.cursor()
+        squery="select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id ="+str(id)
+        cur.execute(squery)
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        return render_template('index-client.html',accounts=data)
     pass
 
 
 @app.route('/deposito', methods=['POST'])
 def deposito():
+    if request.method == 'POST':
+        nroc = request.form['account']
+        monto= request.form['amount']
+        #nroc=request.args.get('nrocuenta','no contiene')
+        #monto=request.args.get('monto','no contiene')
+        query="SELECT xu.nombre,xu.apellidoP,xu.apellidoM,xc.saldo,xc.idcuenta,xu.id FROM usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xc.nrocuenta="+str(nroc)
+        cur = mysql.connection.cursor()
+        cur.execute(query)
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        saldo=data[0][3]
+        id=data[0][5]
+        idcuenta=data[0][4]
+        print(id)
+        monto=int(monto)
+        saldo=int(saldo)
+        actual=saldo +monto
+        cur = mysql.connection.cursor()
+        #"UPDATE cuenta set saldo="+str(monto)+"WHERE idcuenta="+str(idcuenta)
+        cur.execute("UPDATE cuenta set saldo="+str(actual)+ " WHERE idcuenta="+str(idcuenta))
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        cur = mysql.connection.cursor()
+        squery="select nrocuenta,saldo,fecha, xu.id, xc.idcuenta from usuario xu, cuenta xc WHERE xu.id=xc.idusuario and xu.id ="+str(id)
+        cur.execute(squery)
+        mysql.connection.commit()
+        data = cur.fetchall()
+        cur.close()
+        flash(' exitoso¡¡')
+        return render_template('index-client.html',accounts=data)
+        
     pass
 
 
@@ -224,10 +262,13 @@ def update_contact(id):
         return redirect(url_for('Index'))
 
 
-@app.route('/delete/<string:id>', methods=['POST', 'GET'])
+@app.route('/delete/<id>', methods=['POST', 'GET'])
 def delete_contact(id):
     cur = mysql.connection.cursor()
-    cur.execute('DELETE FROM usuario WHERE id = {0}'.format(id))
+    
+    lista=id.split(',')
+    print(type(id),lista[0],'11111111111111111111111111111111111111')
+    cur.execute('DELETE FROM usuario WHERE id = '+str(lista[0]))
     mysql.connection.commit()
     flash('Contact Removed Successfully')
     return redirect(url_for('Index'))
